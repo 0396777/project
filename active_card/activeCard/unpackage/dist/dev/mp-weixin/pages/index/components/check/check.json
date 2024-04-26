@@ -1,0 +1,11 @@
+{
+  "usingComponents": {
+    "u-button": "/node-modules/uview-ui/components/u-button/u-button",
+    "u-tag": "/node-modules/uview-ui/components/u-tag/u-tag",
+    "u-popup": "/node-modules/uview-ui/components/u-popup/u-popup",
+    "u-radio-group": "/node-modules/uview-ui/components/u-radio-group/u-radio-group",
+    "u-radio": "/node-modules/uview-ui/components/u-radio/u-radio",
+    "u-picker": "/node-modules/uview-ui/components/u-picker/u-picker"
+  },
+  "component": true
+}

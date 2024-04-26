@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atcard.mappers.UsersMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.atcard.entity.po.Users">
+		<!---->
+		<id column="id" property="id"  />
+		<!---->
+		<result column="user_name" property="userName"  />
+		<!---->
+		<result column="password" property="password"  />
+		<!---->
+		<result column="email" property="email"  />
+		<!---->
+		<result column="created_at" property="createdAt"  />
+	</resultMap>
+
+
+	<!-- 通用查询结果列-->
+	<sql id="base_column_list">
+		 id,user_name,password,email,created_at
+		 
+	</sql>
+
+	<sql id="base_condition_filed">
+			<if test="query.id != null">
+				 and  id = #{query.id}
+			</if>
+			<if test="query.userName != null and query.userName!=''">
+				 and  user_name = #{query.userName}
+			</if>
+			<if test="query.password != null and query.password!=''">
+				 and  password = #{query.password}
+			</if>
+			<if test="query.email != null and query.email!=''">
+				 and  email = #{query.email}
+			</if>
+			<if test="query.createdAt != null and query.createdAt!=''">
+				 <![CDATA[ and  created_at=str_to_date(#{query.createdAt}, '%Y-%m-%d') ]]>
+			</if>
+	</sql>
+	<!-- 通用条件列-->
+	<sql id="base_condition">
+	 <where>
+		 <include refid="base_condition_filed" />
+	 </where>
+	</sql>
+
+	<!-- 通用查询条件列-->
+	<sql id="query_condition">
+	 <where>
+			<include refid="base_condition_filed" />
+			<if test="query.userNameFuzzy!= null  and query.userNameFuzzy!=''">
+				 and  user_name like concat('%', #{query.userNameFuzzy}, '%')
+			</if>
+			<if test="query.passwordFuzzy!= null  and query.passwordFuzzy!=''">
+				 and  password like concat('%', #{query.passwordFuzzy}, '%')
+			</if>
+			<if test="query.emailFuzzy!= null  and query.emailFuzzy!=''">
+				 and  email like concat('%', #{query.emailFuzzy}, '%')
+			</if>
+			<if test="query.createdAtStart!= null and query.createdAtStart!=''">
+				 <![CDATA[ and  created_at>=str_to_date(#{query.createdAtStart}, '%Y-%m-%d') ]]>
+			</if>
+			<if test="query.createdAtEnd!= null and query.createdAtEnd!=''">
+				 <![CDATA[ and  created_at< date_sub(str_to_date(#{query.createdAtEnd},'%Y-%m-%d'),interval -1 day) ]]>
+			</if>
+	 </where>
+	</sql>
+
+	<!-- 查询集合-->
+	<select id="selectList" resultMap="base_result_map" >
+		 SELECT <include refid="base_column_list" /> FROM users <include refid="query_condition" />
+		 <if test="query.orderBy!=null">
+			 order by ${query.orderBy}
+		 </if>
+		 <if test="query.simplePage!=null">
+			 limit #{query.simplePage.start},#{query.simplePage.end}
+		 </if>
+	</select>
+
+	<!-- 查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer" >
+		 SELECT count(1) FROM users <include refid="query_condition" />
+	</select>
+
+	<!-- 插入 （匹配有值的字段）-->
+	<insert id="insert" parameterType="com.atcard.entity.po.Users">
+
+		 INSERT INTO users
+		 <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="bean.userName != null">
+				 user_name,
+			</if>
+			<if test="bean.password != null">
+				 password,
+			</if>
+			<if test="bean.email != null">
+				 email,
+			</if>
+			<if test="bean.createdAt != null">
+				 created_at,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="bean.userName!=null">
+				 #{bean.userName},
+			</if>
+			<if test="bean.password!=null">
+				 #{bean.password},
+			</if>
+			<if test="bean.email!=null">
+				 #{bean.email},
+			</if>
+			<if test="bean.createdAt!=null">
+				 #{bean.createdAt},
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 插入或者更新 （匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.atcard.entity.po.Users">
+		 INSERT INTO users
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				 id,
+			</if>
+			<if test="bean.userName != null">
+				 user_name,
+			</if>
+			<if test="bean.password != null">
+				 password,
+			</if>
+			<if test="bean.email != null">
+				 email,
+			</if>
+			<if test="bean.createdAt != null">
+				 created_at,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				 #{bean.id},
+			</if>
+			<if test="bean.userName!=null">
+				 #{bean.userName},
+			</if>
+			<if test="bean.password!=null">
+				 #{bean.password},
+			</if>
+			<if test="bean.email!=null">
+				 #{bean.email},
+			</if>
+			<if test="bean.createdAt!=null">
+				 #{bean.createdAt},
+			</if>
+		 </trim>
+		 on DUPLICATE key update 
+		 <trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.userName!=null">
+				 user_name = VALUES(user_name),
+			</if>
+			<if test="bean.password!=null">
+				 password = VALUES(password),
+			</if>
+			<if test="bean.email!=null">
+				 email = VALUES(email),
+			</if>
+			<if test="bean.createdAt!=null">
+				 created_at = VALUES(created_at),
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 添加 （批量插入）-->
+	<insert id="insertBatch" parameterType="com.atcard.entity.po.Users" useGeneratedKeys="true" keyProperty="id">
+		 INSERT INTO users(
+			 user_name,
+			 password,
+			 email,
+			 created_at
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.userName},
+				 #{item.password},
+				 #{item.email},
+				 #{item.createdAt}
+			 )
+		 </foreach>
+	</insert>
+
+	<!-- 批量新增修改 （批量插入）-->
+	<insert id="insertOrUpdateBatch" parameterType="com.atcard.entity.po.Users">
+		 INSERT INTO users(
+			 user_name,
+			 password,
+			 email,
+			 created_at
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.userName},
+				 #{item.password},
+				 #{item.email},
+				 #{item.createdAt}
+			 )
+		 </foreach>
+			on DUPLICATE key update 
+			user_name = VALUES(user_name),
+			password = VALUES(password),
+			email = VALUES(email),
+			created_at = VALUES(created_at)
+	</insert>
+
+	<!--多条件修改-->
+	<update id="updateByParam" parameterType="com.atcard.entity.query.UsersQuery">
+		 UPDATE users
+ 		 <set> 
+			<if test="bean.userName != null">
+				 user_name = #{bean.userName},
+			</if>
+			<if test="bean.password != null">
+				 password = #{bean.password},
+			</if>
+			<if test="bean.email != null">
+				 email = #{bean.email},
+			</if>
+			<if test="bean.createdAt != null">
+				 created_at = #{bean.createdAt},
+			</if>
+ 		 </set>
+ 		 <include refid="query_condition" />
+	</update>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		 delete from users
+ 		 <include refid="query_condition" />
+	</delete>
+
+	<!-- 根据Id修改-->
+	<update id="updateById" parameterType="com.atcard.entity.po.Users">
+		 UPDATE users
+ 		 <set> 
+			<if test="bean.userName != null">
+				 user_name = #{bean.userName},
+			</if>
+			<if test="bean.password != null">
+				 password = #{bean.password},
+			</if>
+			<if test="bean.email != null">
+				 email = #{bean.email},
+			</if>
+			<if test="bean.createdAt != null">
+				 created_at = #{bean.createdAt},
+			</if>
+ 		 </set>
+ 		 where id=#{id}
+	</update>
+
+	<!-- 根据Id删除-->
+	<delete id="deleteById">
+		delete from users where id=#{id}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectById" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from users where id=#{id}
+	</select>
+
+	<!-- 根据UserName修改-->
+	<update id="updateByUserName" parameterType="com.atcard.entity.po.Users">
+		 UPDATE users
+ 		 <set> 
+			<if test="bean.password != null">
+				 password = #{bean.password},
+			</if>
+			<if test="bean.email != null">
+				 email = #{bean.email},
+			</if>
+			<if test="bean.createdAt != null">
+				 created_at = #{bean.createdAt},
+			</if>
+ 		 </set>
+ 		 where user_name=#{userName}
+	</update>
+
+	<!-- 根据UserName删除-->
+	<delete id="deleteByUserName">
+		delete from users where user_name=#{userName}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectByUserName" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from users where user_name=#{userName}
+	</select>
+
+	<!-- 根据Email修改-->
+	<update id="updateByEmail" parameterType="com.atcard.entity.po.Users">
+		 UPDATE users
+ 		 <set> 
+			<if test="bean.userName != null">
+				 user_name = #{bean.userName},
+			</if>
+			<if test="bean.password != null">
+				 password = #{bean.password},
+			</if>
+			<if test="bean.createdAt != null">
+				 created_at = #{bean.createdAt},
+			</if>
+ 		 </set>
+ 		 where email=#{email}
+	</update>
+
+	<!-- 根据Email删除-->
+	<delete id="deleteByEmail">
+		delete from users where email=#{email}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectByEmail" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from users where email=#{email}
+	</select>
+
+</mapper>

@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "首页",
+  "usingComponents": {
+    "index-page": "/pages/index/components/index-page/index",
+    "mine-page": "/pages/index/components/mine-page/mine",
+    "note": "/pages/index/components/note/note",
+    "check": "/pages/index/components/check/check",
+    "time": "/pages/index/components/time/time",
+    "time-down": "/pages/index/components/time/timeDown"
+  }
+}

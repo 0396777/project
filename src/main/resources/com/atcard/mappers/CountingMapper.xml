@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atcard.mappers.CountingMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.atcard.entity.po.Counting">
+		<!---->
+		<id column="id" property="id"  />
+		<!---->
+		<result column="create_time" property="createTime"  />
+		<!---->
+		<result column="time" property="time"  />
+		<!---->
+		<result column="user_id" property="userId"  />
+	</resultMap>
+
+
+	<!-- 通用查询结果列-->
+	<sql id="base_column_list">
+		 id,create_time,time,user_id
+	</sql>
+
+	<sql id="base_condition_filed">
+			<if test="query.id != null">
+				 and  id = #{query.id}
+			</if>
+			<if test="query.createTime != null and query.createTime!=''">
+				 and  create_time = #{query.createTime}
+			</if>
+			<if test="query.time != null and query.time!=''">
+				 and  time = #{query.time}
+			</if>
+			<if test="query.userId != null">
+				 and  user_id = #{query.userId}
+			</if>
+	</sql>
+	<!-- 通用条件列-->
+	<sql id="base_condition">
+	 <where>
+		 <include refid="base_condition_filed" />
+	 </where>
+	</sql>
+
+	<!-- 通用查询条件列-->
+	<sql id="query_condition">
+	 <where>
+			<include refid="base_condition_filed" />
+			<if test="query.createTimeFuzzy!= null  and query.createTimeFuzzy!=''">
+				 and  create_time like concat('%', #{query.createTimeFuzzy}, '%')
+			</if>
+			<if test="query.timeFuzzy!= null  and query.timeFuzzy!=''">
+				 and  time like concat('%', #{query.timeFuzzy}, '%')
+			</if>
+	 </where>
+	</sql>
+
+	<!-- 查询集合-->
+	<select id="selectList" resultMap="base_result_map" >
+		 SELECT <include refid="base_column_list" /> FROM counting <include refid="query_condition" />
+		 <if test="query.orderBy!=null">
+			 order by ${query.orderBy}
+		 </if>
+		 <if test="query.simplePage!=null">
+			 limit #{query.simplePage.start},#{query.simplePage.end}
+		 </if>
+	</select>
+
+	<!-- 查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer" >
+		 SELECT count(1) FROM counting <include refid="query_condition" />
+	</select>
+
+	<!-- 插入 （匹配有值的字段）-->
+	<insert id="insert" parameterType="com.atcard.entity.po.Counting">
+		<selectKey keyProperty="bean.id" resultType="Integer" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		 INSERT INTO counting
+		 <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="bean.createTime != null">
+				 create_time,
+			</if>
+			<if test="bean.time != null">
+				 time,
+			</if>
+			<if test="bean.userId != null">
+				 user_id,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="bean.createTime!=null">
+				 #{bean.createTime},
+			</if>
+			<if test="bean.time!=null">
+				 #{bean.time},
+			</if>
+			<if test="bean.userId!=null">
+				 #{bean.userId},
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 插入或者更新 （匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.atcard.entity.po.Counting">
+		 INSERT INTO counting
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				 id,
+			</if>
+			<if test="bean.createTime != null">
+				 create_time,
+			</if>
+			<if test="bean.time != null">
+				 time,
+			</if>
+			<if test="bean.userId != null">
+				 user_id,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				 #{bean.id},
+			</if>
+			<if test="bean.createTime!=null">
+				 #{bean.createTime},
+			</if>
+			<if test="bean.time!=null">
+				 #{bean.time},
+			</if>
+			<if test="bean.userId!=null">
+				 #{bean.userId},
+			</if>
+		 </trim>
+		 on DUPLICATE key update 
+		 <trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.createTime!=null">
+				 create_time = VALUES(create_time),
+			</if>
+			<if test="bean.time!=null">
+				 time = VALUES(time),
+			</if>
+			<if test="bean.userId!=null">
+				 user_id = VALUES(user_id),
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 添加 （批量插入）-->
+	<insert id="insertBatch" parameterType="com.atcard.entity.po.Counting" useGeneratedKeys="true" keyProperty="id">
+		 INSERT INTO counting(
+			 create_time,
+			 time,
+			 user_id
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.createTime},
+				 #{item.time},
+				 #{item.userId}
+			 )
+		 </foreach>
+	</insert>
+
+	<!-- 批量新增修改 （批量插入）-->
+	<insert id="insertOrUpdateBatch" parameterType="com.atcard.entity.po.Counting">
+		 INSERT INTO counting(
+			 create_time,
+			 time,
+			 user_id
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.createTime},
+				 #{item.time},
+				 #{item.userId}
+			 )
+		 </foreach>
+			on DUPLICATE key update 
+			create_time = VALUES(create_time),
+			time = VALUES(time),
+			user_id = VALUES(user_id)
+	</insert>
+
+	<!--多条件修改-->
+	<update id="updateByParam" parameterType="com.atcard.entity.query.CountingQuery">
+		 UPDATE counting
+ 		 <set> 
+			<if test="bean.createTime != null">
+				 create_time = #{bean.createTime},
+			</if>
+			<if test="bean.time != null">
+				 time = #{bean.time},
+			</if>
+			<if test="bean.userId != null">
+				 user_id = #{bean.userId},
+			</if>
+ 		 </set>
+ 		 <include refid="query_condition" />
+	</update>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		 delete from counting
+ 		 <include refid="query_condition" />
+	</delete>
+
+	<!-- 根据Id修改-->
+	<update id="updateById" parameterType="com.atcard.entity.po.Counting">
+		 UPDATE counting
+ 		 <set> 
+			<if test="bean.createTime != null">
+				 create_time = #{bean.createTime},
+			</if>
+			<if test="bean.time != null">
+				 time = #{bean.time},
+			</if>
+			<if test="bean.userId != null">
+				 user_id = #{bean.userId},
+			</if>
+ 		 </set>
+ 		 where id=#{id}
+	</update>
+
+	<!-- 根据Id删除-->
+	<delete id="deleteById">
+		delete from counting where id=#{id}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectById" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from counting where id=#{id}
+	</select>
+
+</mapper>

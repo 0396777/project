@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atcard.mappers.WaitMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.atcard.entity.po.Wait">
+		<!---->
+		<result column="id" property="id"  />
+		<!--用户名称-->
+		<result column="user_name" property="userName"  />
+		<!--待办事件详情-->
+		<result column="event_info" property="eventInfo"  />
+		<!--完成时间-->
+		<result column="ok_time" property="okTime"  />
+		<!--创建时间-->
+		<result column="create_time" property="createTime"  />
+		<!--是否完成-->
+		<result column="is_ok" property="isOk"  />
+		<!---->
+		<result column="name" property="name"  />
+	</resultMap>
+
+
+	<!-- 通用查询结果列-->
+	<sql id="base_column_list">
+		 id,user_name,event_info,ok_time,create_time,
+		 is_ok,name
+	</sql>
+
+	<sql id="base_condition_filed">
+			<if test="query.id != null">
+				 and  id = #{query.id}
+			</if>
+			<if test="query.userName != null and query.userName!=''">
+				 and  user_name = #{query.userName}
+			</if>
+			<if test="query.eventInfo != null and query.eventInfo!=''">
+				 and  event_info = #{query.eventInfo}
+			</if>
+			<if test="query.okTime != null and query.okTime!=''">
+				 <![CDATA[ and  ok_time=str_to_date(#{query.okTime}, '%Y-%m-%d') ]]>
+			</if>
+			<if test="query.createTime != null and query.createTime!=''">
+				 <![CDATA[ and  create_time=str_to_date(#{query.createTime}, '%Y-%m-%d') ]]>
+			</if>
+			<if test="query.isOk != null">
+				 and  is_ok = #{query.isOk}
+			</if>
+			<if test="query.name != null and query.name!=''">
+				 and  name = #{query.name}
+			</if>
+	</sql>
+	<!-- 通用条件列-->
+	<sql id="base_condition">
+	 <where>
+		 <include refid="base_condition_filed" />
+	 </where>
+	</sql>
+
+	<!-- 通用查询条件列-->
+	<sql id="query_condition">
+	 <where>
+			<include refid="base_condition_filed" />
+			<if test="query.userNameFuzzy!= null  and query.userNameFuzzy!=''">
+				 and  user_name like concat('%', #{query.userNameFuzzy}, '%')
+			</if>
+			<if test="query.eventInfoFuzzy!= null  and query.eventInfoFuzzy!=''">
+				 and  event_info like concat('%', #{query.eventInfoFuzzy}, '%')
+			</if>
+			<if test="query.okTimeStart!= null and query.okTimeStart!=''">
+				 <![CDATA[ and  ok_time>=str_to_date(#{query.okTimeStart}, '%Y-%m-%d') ]]>
+			</if>
+			<if test="query.okTimeEnd!= null and query.okTimeEnd!=''">
+				 <![CDATA[ and  ok_time< date_sub(str_to_date(#{query.okTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
+			</if>
+			<if test="query.createTimeStart!= null and query.createTimeStart!=''">
+				 <![CDATA[ and  create_time>=str_to_date(#{query.createTimeStart}, '%Y-%m-%d') ]]>
+			</if>
+			<if test="query.createTimeEnd!= null and query.createTimeEnd!=''">
+				 <![CDATA[ and  create_time< date_sub(str_to_date(#{query.createTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
+			</if>
+			<if test="query.nameFuzzy!= null  and query.nameFuzzy!=''">
+				 and  name like concat('%', #{query.nameFuzzy}, '%')
+			</if>
+	 </where>
+	</sql>
+
+	<!-- 查询集合-->
+	<select id="selectList" resultMap="base_result_map" >
+		 SELECT <include refid="base_column_list" /> FROM wait <include refid="query_condition" />
+		 <if test="query.orderBy!=null">
+			 order by ${query.orderBy}
+		 </if>
+		 <if test="query.simplePage!=null">
+			 limit #{query.simplePage.start},#{query.simplePage.end}
+		 </if>
+	</select>
+
+	<!-- 查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer" >
+		 SELECT count(1) FROM wait <include refid="query_condition" />
+	</select>
+
+	<!-- 插入 （匹配有值的字段）-->
+	<insert id="insert" parameterType="com.atcard.entity.po.Wait">
+		 INSERT INTO wait
+		 <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="bean.id != null">
+				 id,
+			</if>
+			<if test="bean.userName != null">
+				 user_name,
+			</if>
+			<if test="bean.eventInfo != null">
+				 event_info,
+			</if>
+			<if test="bean.okTime != null">
+				 ok_time,
+			</if>
+			<if test="bean.createTime != null">
+				 create_time,
+			</if>
+			<if test="bean.isOk != null">
+				 is_ok,
+			</if>
+			<if test="bean.name != null">
+				 name,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="bean.id!=null">
+				 #{bean.id},
+			</if>
+			<if test="bean.userName!=null">
+				 #{bean.userName},
+			</if>
+			<if test="bean.eventInfo!=null">
+				 #{bean.eventInfo},
+			</if>
+			<if test="bean.okTime!=null">
+				 #{bean.okTime},
+			</if>
+			<if test="bean.createTime!=null">
+				 #{bean.createTime},
+			</if>
+			<if test="bean.isOk!=null">
+				 #{bean.isOk},
+			</if>
+			<if test="bean.name!=null">
+				 #{bean.name},
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 插入或者更新 （匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.atcard.entity.po.Wait">
+		 INSERT INTO wait
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				 id,
+			</if>
+			<if test="bean.userName != null">
+				 user_name,
+			</if>
+			<if test="bean.eventInfo != null">
+				 event_info,
+			</if>
+			<if test="bean.okTime != null">
+				 ok_time,
+			</if>
+			<if test="bean.createTime != null">
+				 create_time,
+			</if>
+			<if test="bean.isOk != null">
+				 is_ok,
+			</if>
+			<if test="bean.name != null">
+				 name,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				 #{bean.id},
+			</if>
+			<if test="bean.userName!=null">
+				 #{bean.userName},
+			</if>
+			<if test="bean.eventInfo!=null">
+				 #{bean.eventInfo},
+			</if>
+			<if test="bean.okTime!=null">
+				 #{bean.okTime},
+			</if>
+			<if test="bean.createTime!=null">
+				 #{bean.createTime},
+			</if>
+			<if test="bean.isOk!=null">
+				 #{bean.isOk},
+			</if>
+			<if test="bean.name!=null">
+				 #{bean.name},
+			</if>
+		 </trim>
+		 on DUPLICATE key update 
+		 <trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.id!=null">
+				 id = VALUES(id),
+			</if>
+			<if test="bean.userName!=null">
+				 user_name = VALUES(user_name),
+			</if>
+			<if test="bean.eventInfo!=null">
+				 event_info = VALUES(event_info),
+			</if>
+			<if test="bean.okTime!=null">
+				 ok_time = VALUES(ok_time),
+			</if>
+			<if test="bean.createTime!=null">
+				 create_time = VALUES(create_time),
+			</if>
+			<if test="bean.isOk!=null">
+				 is_ok = VALUES(is_ok),
+			</if>
+			<if test="bean.name!=null">
+				 name = VALUES(name),
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 添加 （批量插入）-->
+	<insert id="insertBatch" parameterType="com.atcard.entity.po.Wait">
+		 INSERT INTO wait(
+			 id,
+			 user_name,
+			 event_info,
+			 ok_time,
+			 create_time,
+			 is_ok,
+			 name
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.id},
+				 #{item.userName},
+				 #{item.eventInfo},
+				 #{item.okTime},
+				 #{item.createTime},
+				 #{item.isOk},
+				 #{item.name}
+			 )
+		 </foreach>
+	</insert>
+
+	<!-- 批量新增修改 （批量插入）-->
+	<insert id="insertOrUpdateBatch" parameterType="com.atcard.entity.po.Wait">
+		 INSERT INTO wait(
+			 id,
+			 user_name,
+			 event_info,
+			 ok_time,
+			 create_time,
+			 is_ok,
+			 name
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.id},
+				 #{item.userName},
+				 #{item.eventInfo},
+				 #{item.okTime},
+				 #{item.createTime},
+				 #{item.isOk},
+				 #{item.name}
+			 )
+		 </foreach>
+			on DUPLICATE key update 
+			id = VALUES(id),
+			user_name = VALUES(user_name),
+			event_info = VALUES(event_info),
+			ok_time = VALUES(ok_time),
+			create_time = VALUES(create_time),
+			is_ok = VALUES(is_ok),
+			name = VALUES(name)
+	</insert>
+
+	<!--多条件修改-->
+	<update id="updateByParam" parameterType="com.atcard.entity.query.WaitQuery">
+		 UPDATE wait
+ 		 <set> 
+			<if test="bean.id != null">
+				 id = #{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				 user_name = #{bean.userName},
+			</if>
+			<if test="bean.eventInfo != null">
+				 event_info = #{bean.eventInfo},
+			</if>
+			<if test="bean.okTime != null">
+				 ok_time = #{bean.okTime},
+			</if>
+			<if test="bean.createTime != null">
+				 create_time = #{bean.createTime},
+			</if>
+			<if test="bean.isOk != null">
+				 is_ok = #{bean.isOk},
+			</if>
+			<if test="bean.name != null">
+				 name = #{bean.name},
+			</if>
+ 		 </set>
+ 		 <include refid="query_condition" />
+	</update>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		 delete from wait
+ 		 <include refid="query_condition" />
+	</delete>
+
+	<!-- 根据Id修改-->
+	<update id="updateById" parameterType="com.atcard.entity.po.Wait">
+		 UPDATE wait
+ 		 <set> 
+			<if test="bean.userName != null">
+				 user_name = #{bean.userName},
+			</if>
+			<if test="bean.eventInfo != null">
+				 event_info = #{bean.eventInfo},
+			</if>
+			<if test="bean.okTime != null">
+				 ok_time = #{bean.okTime},
+			</if>
+			<if test="bean.createTime != null">
+				 create_time = #{bean.createTime},
+			</if>
+			<if test="bean.isOk != null">
+				 is_ok = #{bean.isOk},
+			</if>
+			<if test="bean.name != null">
+				 name = #{bean.name},
+			</if>
+ 		 </set>
+ 		 where id=#{id}
+	</update>
+
+	<!-- 根据Id删除-->
+	<delete id="deleteById">
+		delete from wait where id=#{id}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectById" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from wait where id=#{id}
+	</select>
+
+</mapper>
